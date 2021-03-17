@@ -63,6 +63,53 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void multiplyMatrices(int **first, int **second, int **result,
+                      int r1, int c1, int r2, int c2) {
+	for (int i = 0; i < r1; i++) {
+		for (int j = 0; j < c2; j++) {
+			result[i][j] = 0;
+		}
+	}
+	for (int i = 0; i < r1; i++) {
+		for (int j = 0; j < c2; j++) {
+			for (int k = 0; k < c1; k++) {
+				result[i][j] += first[i][k] * second[k][j];
+			}
+		}
+	}
+}
+
+typedef union _tag_data_simd
+{
+	int16_t  s_int16[2];
+	uint16_t  u_int16[2];
+	int32_t  s_int32;
+	uint32_t  u_int32;
+} data_simd;
+
+void multiplyMatricesSIMD(int16_t **first, int16_t **second, int32_t **result,
+                      uint32_t r1, uint32_t c1, uint32_t r2, uint32_t c2) {
+	data_simd s1, s2;
+	for (uint32_t i = 0; i < r1; i++) {
+		for (uint32_t j = 0; j < c2; j++) {
+			result[i][j] = 0;
+		}
+	}
+	for (uint32_t i = 0; i < r1; i++) {
+		for (uint32_t j = 0; j < c2; j++) {
+			for (uint32_t k = 0; k < c1; k+=2) {
+				s1.s_int16[0] = first[i][k];
+				s2.s_int16[0] = second[i][k];
+				s1.s_int16[1] = first[i][k + 1];
+				s2.s_int16[1] = second[i][k + 1];
+//				p1 = val1[15:0]  * val2[15:0]
+//				p2 = val1[31:16] * val2[31:16]
+//				res[31:0] = p1 + p2 + val3[31:0]
+				result[i][j] = (int32_t)__SMLAD(s1.u_int32, s2.u_int32, (uint32_t)result[i][j]);
+			}
+		}
+	}
+}
 
 /* USER CODE END 0 */
 
@@ -114,6 +161,14 @@ int main(void)
   /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init(); 
 
+  HAL_GPIO_WritePin(LED_CH1_GPIO_Port, LED_CH1_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LED_CH2_GPIO_Port, LED_CH2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LED_CH3_GPIO_Port, LED_CH3_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LED_CH4_GPIO_Port, LED_CH4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LED_CH5_GPIO_Port, LED_CH5_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LED_CH6_GPIO_Port, LED_CH6_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LED_CH7_GPIO_Port, LED_CH7_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LED_CH8_GPIO_Port, LED_CH8_Pin, GPIO_PIN_RESET);
   /* Start scheduler */
   osKernelStart();
   
@@ -206,3 +261,7 @@ void assert_failed(uint8_t *file, uint32_t line)
 #endif /* USE_FULL_ASSERT */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+
+
+
+
