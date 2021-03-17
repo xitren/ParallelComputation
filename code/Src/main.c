@@ -105,7 +105,8 @@ void multiplyMatricesSIMD(int16_t **first, int16_t **second, int32_t **result,
 //				p1 = val1[15:0]  * val2[15:0]
 //				p2 = val1[31:16] * val2[31:16]
 //				res[31:0] = p1 + p2 + val3[31:0]
-				result[i][j] = (int32_t)__SMLAD(s1.u_int32, s2.u_int32, (uint32_t)result[i][j]);
+				result[i][j] = (int32_t)__SMLAD(s1.u_int32, s2.u_int32,
+					(uint32_t)result[i][j]);
 			}
 		}
 	}
@@ -261,6 +262,7 @@ void assert_failed(uint8_t *file, uint32_t line)
 #endif /* USE_FULL_ASSERT */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+
 
 
 
